@@ -1,0 +1,45 @@
+job:
+  preconfigured:
+    kubernetes:
+      - label: Poll For Ticket Status
+        type: pollTicketStatus
+        description: Poll system for desired ticket status
+        cloudProvider: kubernetes
+        account: {your-k8s-account}
+        credentials: {your-k8s-account}
+        waitForCompletion: true
+        application: {spinnaker-application-name}
+        parameters:
+          - name: API_URL
+            label: API URL
+            description: API endpoint to poll
+            mapping: manifest.spec.template.spec.containers[0].env[0].value
+          - name: STATUS_FILTER
+            label: Status Filter
+            description: JQ filter to used to extract status
+            mapping: manifest.spec.template.spec.containers[0].env[1].value
+          - name: DESIRED_STATUS
+            label: Status
+            description: Status to trigger end of polling
+            mapping: manifest.spec.template.spec.containers[0].env[3].value
+        manifest:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: status-poller
+            namespace: spinnaker
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers: 
+                  - name: status-poller
+                    image: {docker-image-name}
+                    env:
+                      - name: API_URL
+                        value: placeholder
+                      - name: STATUS_FILTER
+                        value: placeholder
+                      - name: DESIRED_STATUS
+                        value: placeholder
